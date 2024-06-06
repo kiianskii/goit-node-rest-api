@@ -12,14 +12,15 @@ import {
   updateContactSchema,
 } from "../schemas/contactsSchemas.js";
 import validateBody from "../helpers/validateBody.js";
+import isValidId from "../helpers/idValid.js";
 
 const contactsRouter = express.Router();
 
 contactsRouter.get("/", getAllContacts);
 
-contactsRouter.get("/:id", getOneContact);
+contactsRouter.get("/:id", isValidId, getOneContact);
 
-contactsRouter.delete("/:id", deleteContact);
+contactsRouter.delete("/:id", isValidId, deleteContact);
 
 contactsRouter.post(
   "/",
@@ -31,6 +32,7 @@ contactsRouter.post(
 contactsRouter.put(
   "/:id",
   validateBody(updateContactSchema),
+  isValidId,
   isEmptyBody,
   updateContact
 );
