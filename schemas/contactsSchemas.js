@@ -15,3 +15,7 @@ export const updateContactSchema = Joi.object({
   phone: Joi.string().pattern(/^\(\d{3}\) \d{3}-\d{4}$/),
   favorite: Joi.boolean(),
 });
+
+export const updateFavoriteSchema = Joi.object({
+  favorite: Joi.boolean().required(),
+});
