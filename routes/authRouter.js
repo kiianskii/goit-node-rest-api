@@ -1,30 +1,30 @@
 import express from "express";
 import validateBody from "../helpers/validateBody.js";
 import isEmptyBody from "../middlewares/emptyBodyCheck.js";
-import isValidId from "../helpers/idValid.js";
 
 import { authSignupSchema, authSigninSchema } from "../schemas/authSchemas.js";
 
 import authControllers from "../controllers/authControllers.js";
+import authenticate from "../middlewares/authenticate.js";
 
 const authRouter = express.Router();
 
 authRouter.post(
-  "/signup",
+  "/register",
   isEmptyBody,
   validateBody(authSignupSchema),
   authControllers.signup
 );
 
 authRouter.post(
-  "/signin",
+  "/login",
   isEmptyBody,
   validateBody(authSigninSchema),
   authControllers.signin
 );
 
-authRouter.get("/current");
+authRouter.get("/current", authenticate, authControllers.getCurrent);
 
-authRouter.post("/signout");
+authRouter.post("/logout", authenticate, authControllers.signout);
 
 export default authRouter;

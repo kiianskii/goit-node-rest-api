@@ -8,11 +8,15 @@ import {
   updateFavoriteSchema,
 } from "../schemas/contactsSchemas.js";
 
-import isEmptyBody from "../helpers/emptyBodyCheck.js";
 import validateBody from "../helpers/validateBody.js";
-import isValidId from "../helpers/idValid.js";
+
+import isEmptyBody from "../middlewares/emptyBodyCheck.js";
+import isValidId from "../middlewares/idValid.js";
+import authenticate from "../middlewares/authenticate.js";
 
 const contactsRouter = express.Router();
+
+contactsRouter.use(authenticate);
 
 contactsRouter.get("/", contactsControllers.getAllContacts);
 
