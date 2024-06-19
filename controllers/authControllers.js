@@ -1,5 +1,10 @@
 import bcrypt from "bcrypt";
 
+import fs from "fs/promises";
+import Jimp from "jimp";
+import path from "path";
+import gravatar from "gravatar";
+
 import HttpError from "../helpers/HttpError.js";
 
 import * as authServices from "../services/authServices.js";
@@ -7,6 +12,8 @@ import * as authServices from "../services/authServices.js";
 import ctrlWrapper from "../helpers/ctrlWrapper.js";
 
 import { createToken } from "../helpers/jwt.js";
+
+const avatarsPath = path.resolve("public", "avatars");
 
 const signup = async (req, res) => {
   const { email, password } = req.body;
@@ -18,10 +25,12 @@ const signup = async (req, res) => {
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
+  const avatarURL = gravatar.url(email);
 
   const newUser = await authServices.signup({
     ...req.body,
     password: hashPassword,
+    avatarURL,
   });
 
   res.status(201).json({
@@ -60,11 +69,12 @@ const signin = async (req, res) => {
 };
 
 const getCurrent = (req, res) => {
-  const { email, subscription } = req.user;
+  const { email, subscription, avatarURL } = req.user;
 
   res.json({
     email,
     subscription,
+    avatarURL,
   });
 };
 
@@ -77,9 +87,28 @@ const signout = async (req, res) => {
   });
 };
 
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: oldPath, filename } = req.file;
+
+  const newPath = path.join(avatarsPath, filename);
+
+  Jimp.read(oldPath, (err, img) => {
+    if (err) throw err;
+    img.resize(250, 250).write(newPath);
+  });
+
+  await fs.rename(oldPath, newPath);
+
+  const avatarURL = path.join("avatars", filename);
+  await authServices.setAvatar(_id, avatarURL);
+  return res.json({ avatarURL });
+};
+
 export default {
   signup: ctrlWrapper(signup),
   signin: ctrlWrapper(signin),
   getCurrent: ctrlWrapper(getCurrent),
   signout: ctrlWrapper(signout),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };
