@@ -2,7 +2,11 @@ import express from "express";
 import validateBody from "../helpers/validateBody.js";
 import isEmptyBody from "../middlewares/emptyBodyCheck.js";
 
-import { authSignupSchema, authSigninSchema } from "../schemas/authSchemas.js";
+import {
+  authSignupSchema,
+  authSigninSchema,
+  authVerifySchema,
+} from "../schemas/authSchemas.js";
 
 import authControllers from "../controllers/authControllers.js";
 import authenticate from "../middlewares/authenticate.js";
@@ -14,6 +18,15 @@ authRouter.post(
   isEmptyBody,
   validateBody(authSignupSchema),
   authControllers.signup
+);
+
+authRouter.get("/verify/:verificationCode", authControllers.verify);
+
+authRouter.post(
+  "/verify",
+  isEmptyBody,
+  validateBody(authVerifySchema),
+  authControllers.resendEmail
 );
 
 authRouter.post(
